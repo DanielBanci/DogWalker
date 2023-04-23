@@ -4,8 +4,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ScrollView;
 import android.widget.Toolbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
@@ -17,6 +19,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.dogwalkerv3.database.Database;
+import com.example.dogwalkerv3.uiposts.newpost.NewPostFragment;
+import com.example.dogwalkerv3.users.ui.AccountDataFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +37,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar appBar;
+    private BottomNavigationView bottomNavigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +54,33 @@ public class MainActivity extends AppCompatActivity {
                 showPopupMenu(view);
             }
         });
-
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_home:
+                        // Replace this with the action you want to perform when the home icon is clicked
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragmentContainerView, new ContentFragment())
+                                .commit();
+                        break;
+                    case R.id.navigation_add_content:
+                        // Replace this with the action you want to perform when the add content icon is clicked
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragmentContainerView, new NewPostFragment())
+                                .commit();
+                        break;
+                    case R.id.navigation_account_data:
+                        // Replace this with the action you want to perform when the account data icon is clicked
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragmentContainerView, new AccountDataFragment())
+                                .commit();
+                        break;
+                }
+                return false;
+            }
+        });
 
     }
 

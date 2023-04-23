@@ -9,4 +9,15 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="description">Description:</string>
+    <string name="location">Location:</string>
+    <string name="price">Price:</string>
+    <string name="empty"> </string>
+    <string name="availability">Available:</string>
+    <string name="feedback">Feedback:</string>
+    <string name="message_hint">Type new message:</string>
+    <string name="contact">Contact</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

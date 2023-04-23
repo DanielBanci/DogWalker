@@ -8,6 +8,8 @@ package com.example.dogwalkerv3.users;
  */
 public class DogWalker extends User{
 
+    public DogWalker(){super();}
+
     /**
      * Constructor of the class
      * @param firstName first name of the user

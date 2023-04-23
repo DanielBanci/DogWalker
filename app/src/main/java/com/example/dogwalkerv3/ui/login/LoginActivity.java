@@ -1,6 +1,7 @@
 package com.example.dogwalkerv3.ui.login;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,9 +20,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.dogwalkerv3.MainActivity;
 import com.example.dogwalkerv3.R;
 import com.example.dogwalkerv3.database.Database;
 import com.example.dogwalkerv3.databinding.ActivityLoginBinding;
+import com.example.dogwalkerv3.users.DogWalker;
+import com.example.dogwalkerv3.users.User;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -126,9 +130,46 @@ public class LoginActivity extends AppCompatActivity {
         String email = usernameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         Database database = new Database(this);
+
+        database.getUser(email, password, new Database.GetUserCallback() {
+            @Override
+            public void onUserReceived(User user) {
+                if (user.getEmail() != null) {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                    Toast.makeText(getApplicationContext(), "Connected successfully", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Connect not succeed", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                throwable.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Connect not succeed", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        /*User user = database.getUser(email,password);
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + password);
+        System.out.println("Email: " + user.getEmail());
+
+        if(user.getEmail() != null){
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+
+            Toast.makeText(getApplicationContext(), "Connected successfully", Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(getApplicationContext(), "Connect not succeed", Toast.LENGTH_LONG).show();
+        }*/
         //database.getUser(email,password);
-        database.getUser(email,password);
-        Toast.makeText(getApplicationContext(), "Connected successfully", Toast.LENGTH_LONG).show();
+        //DogWalker dogWalker = new DogWalker("Ion","Ionescu","ionescu@gmail.com","parolaluiionescu");
+        //database.insertUser(dogWalker);
+
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {

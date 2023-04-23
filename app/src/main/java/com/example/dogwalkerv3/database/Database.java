@@ -10,12 +10,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.dogwalkerv3.MainActivity;
+import com.example.dogwalkerv3.users.DogWalker;
+import com.example.dogwalkerv3.users.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * Class that helps us manage the database.
@@ -28,90 +33,89 @@ public class Database {
     private String url;
     private String phpFile;
     private RequestQueue requestQueue;
+    private ServerInterface serverInterface;
 
     public Database(Context context){
         this.context = context;
-        this.url = "http://192.168.56.1/dogWalker/";
+        this.url = Server.getInstance().getBaseURL();//"http://192.168.56.1/dogWalker/";
         this.phpFile = "";
         this.requestQueue = Volley.newRequestQueue(context);
+        serverInterface = Server.getInstance().getRetrofit().create(ServerInterface.class);
     }
 
-    public void insertUser(){
-        this.phpFile = "insertUser.php";
+    public void insertUser(User user) {
+        Call<String> call = serverInterface.insertUser(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPassword());
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url + phpFile,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            String success = jsonObject.getString("success");
-                            System.out.println("\n\nRespond received: " + success + "\n\n");
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("\n\nRespond received: " + response/*success*/ + "\n\n");
-
-                    }
-                }, new Response.ErrorListener() {
+        call.enqueue(new Callback<String>() {
             @Override
-            public void onErrorResponse(VolleyError error){
-                System.out.println("\n\nError!!!!!!!!!!!!!\n\n");
+            public void onResponse(Call<String> call, retrofit2.Response<String> response) {
+                String resp = response.body();
+                System.out.println("Aici e: " + resp);
+                System.out.println("Aici e message: " + response.message());
+                System.out.println("Aici e body: " + response.body());
+                System.out.println("Aici e isSuccesfull: " + response.isSuccessful());
             }
-        })
-        {
+
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("id","3");
-                params.put("name","Alexandra2");
-                params.put("email","alexandra@gmail.com");
-                params.put("password","123456");
-
-                return params;
+            public void onFailure(Call<String> call, Throwable t) {
+                t.printStackTrace();
+                System.out.println("ERROR!!!!!!!!!!!!!!!!!!!");
             }
-        };
-
-        this.requestQueue.add(stringRequest);
+        });
     }
-
-    public void getUser(String email, String password){
+    public interface GetUserCallback {
+        void onUserReceived(User user);
+        void onError(Throwable throwable);
+    }
+    public void getUser(String email, String password,GetUserCallback callback){
         this.phpFile = "getUser.php";
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url + phpFile,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                       try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            String success = jsonObject.getString("success");
-                            System.out.println("\n\nRespond received: " + success + "\n\n");
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("\n\nRespond received: " + response/*success*/ + "\n\n");
-
-                    }
-                }, new Response.ErrorListener() {
+        Call<String> call = serverInterface.getUser(email, password);
+        //Call<String> call = serverInterface.trySomething(email, password);
+        User user = new DogWalker();
+        call.enqueue(new Callback<String>() {
             @Override
-            public void onErrorResponse(VolleyError error){
-                System.out.println("\n\nError!!!!!!!!!!!!!\n\n");
+            public void onResponse(Call<String> call, retrofit2.Response<String> response) {
+                String resp = response.body();
+
+                System.out.println("Aici e: " + resp);
+                System.out.println("Aici e message: " + response.message());
+                System.out.println("Aici e body: " + response.body());
+                System.out.println("Aici e isSuccesfull: " + response.isSuccessful());
+
+                try {
+                    // Parse the JSON response
+                    JSONObject jsonObject = new JSONObject(resp);
+
+                    // Extract the email and password fields
+                    String email = jsonObject.getString("email");
+                    String password = jsonObject.getString("password");
+
+                    // Create a new user object and set the email and password fields
+System.out.println("DAAAAAAAAAAAAA");
+                    user.setEmail(email);
+                    user.setPassword(password);
+                    callback.onUserReceived(user);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+
             }
-        })
-        {
+
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                System.out.println("email = " + email);
-                System.out.println("password = " + password);
-                params.put("email",email);
-                params.put("password",password);
-
-                return params;
+            public void onFailure(Call<String> call, Throwable t) {
+                t.printStackTrace();
+                System.out.println("ERROR!!!!!!!!!!!!!!!!!!!");
             }
-        };
+        });
 
-        this.requestQueue.add(stringRequest);
     }
 
 
